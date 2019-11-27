@@ -1,5 +1,13 @@
+<script src="/login/status">
+</script>
+<script>
+  if (!isLogin) {
+    location.href = 'login.html';
+  }
+</script>
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Add new post &laquo; Admin</title>
@@ -9,8 +17,11 @@
   <link rel="stylesheet" href="../assets/css/admin.css">
   <script src="../assets/vendors/nprogress/nprogress.js"></script>
 </head>
+
 <body>
-  <script>NProgress.start()</script>
+  <script>
+    NProgress.start()
+  </script>
 
   <div class="main">
     <nav class="navbar">
@@ -28,53 +39,62 @@
       <!-- <div class="alert alert-danger">
         <strong>错误！</strong>发生XXX错误
       </div> -->
-      <form class="row">
-        <div class="col-md-9">
-          <div class="form-group">
-            <label for="title">标题</label>
-            <input id="title" class="form-control input-lg" name="title" type="text" placeholder="文章标题">
+
+      <div id="editBox">
+        <form class="row" id="addArticle">
+          <div class="col-md-9">
+            <div class="form-group">
+              <label for="title">标题</label>
+              <input id="title" class="form-control input-lg" name="title" type="text" placeholder="文章标题" name="title">
+            </div>
+            <div class="form-group">
+              <label for="content">内容</label>
+              <textarea id="content" class="form-control input-lg" name="content" cols="30" rows="10" placeholder="内容"
+                name='content'></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="content">标题</label>
-            <textarea id="content" class="form-control input-lg" name="content" cols="30" rows="10" placeholder="内容"></textarea>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label for="feature">特色图像</label>
+              <!-- show when image chose -->
+              <img class="help-block thumbnail" id="preview" src="/uploads/widget_2.jpg" width="100" height="100">
+              <input id="feature" class="form-control" name="feature" type="file">
+              <input type="hidden" name="thumbnail" id="thumbnail">
+            </div>
+            <div class="form-group">
+              <label for="category">所属分类</label>
+              <select id="category" class="form-control" name="category">
+
+
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="created">发布时间</label>
+              <input id="created" class="form-control" type="date" name='createAt'>
+            </div>
+            <div class="form-group">
+              <label for="status">状态</label>
+              <select id="status" class="form-control" name="state">
+                <option value="0">草稿</option>
+                <option value="1">已发布</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary" type="submit">保存</button>
+            </div>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="form-group">
-            <label for="feature">特色图像</label>
-            <!-- show when image chose -->
-            <img class="help-block thumbnail" style="display: none">
-            <input id="feature" class="form-control" name="feature" type="file">
-          </div>
-          <div class="form-group">
-            <label for="category">所属分类</label>
-            <select id="category" class="form-control" name="category">
-              <option value="1">未分类</option>
-              <option value="2">潮生活</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="created">发布时间</label>
-            <input id="created" class="form-control" name="created" type="datetime-local">
-          </div>
-          <div class="form-group">
-            <label for="status">状态</label>
-            <select id="status" class="form-control" name="status">
-              <option value="drafted">草稿</option>
-              <option value="published">已发布</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <button class="btn btn-primary" type="submit">保存</button>
-          </div>
-        </div>
-      </form>
+        </form>
+      </div>
+
+
+
+
     </div>
   </div>
 
   <div class="aside">
     <div class="profile">
-      <img class="avatar" src="../uploads/avatar.jpg">
+      <img class="avatar" src="">
       <h3 class="name">Coder</h3>
     </div>
     <ul class="nav">
@@ -111,6 +131,77 @@
 
   <script src="../assets/vendors/jquery/jquery.js"></script>
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
-  <script>NProgress.done()</script>
+  <script src="../assets/vendors/art-template/template-web.js"></script>
+  <script>
+    let date = new Date();
+    year = date.getFullYear();
+    month = date.getMonth() + 1;
+    month = month < 10 ? '0' + month : month;
+    day = date.getDate();
+    day = day < 10 ? '0' + day : day;
+    time = `${year}-${month}-${day}`;
+    console.log(time)
+    $('#created').val(time);
+  </script>
+  <!-- 下拉分类列表模板 -->
+  <script type="text/html" id="categoryListTep">
+    {{each data}}
+    <option value="{{$value._id}}">{{$value.title}}</option>
+    {{/each}}
+  </script>
+  <!-- 修改文章模板 -->
+  <script type="text/html" id="modifyTep">
+    <form class="row" id="modifyForm" data-id={{_id}}>
+      <div class="col-md-9">
+        <div class="form-group">
+          <label for="title">标题</label>
+          <input id="title" class="form-control input-lg" name="title" type="text" placeholder="文章标题" name="title"
+            value={{title}}>
+        </div>
+        <div class="form-group">
+          <label for="content">内容</label>
+          <textarea id="content" class="form-control input-lg" name="content" cols="30" rows="10" placeholder="内容"
+            name='content'>{{content}}</textarea>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group">
+          <label for="feature">特色图像</label>
+          <!-- show when image chose -->
+          <img class="help-block thumbnail" id="preview" src={{thumbnail}} width="100" height="100">
+          <input id="feature" class="form-control" name="feature" type="file">
+          <input type="hidden" name="thumbnail" id="thumbnail" value={{thumbnail}}>
+        </div>
+        <div class="form-group">
+          <label for="category">所属分类</label>
+          <select id="category" class="form-control" name="category">
+            {{each categories}}
+            <option {{category==$value._id?'selected':''}} value={{$value._id}}>{{$value.title}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="created">发布时间</label>
+          <input id="created" class="form-control" type="date" name='createAt' value={{createAt.split('T')[0]}}>
+        </div>
+        <div class="form-group">
+          <label for="status">状态</label>
+          <select id="status" class="form-control" name="state">
+            <option value="0" {{state==0?'selected':''}}>草稿</option>
+            <option value="1" {{state==1?'selected':''}}>已发布</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" type="submit">修改</button>
+        </div>
+      </div>
+    </form>
+  </script>
+  <script src="../assets/js/post-add.js"></script>
+  <script src="../assets/js/common.js"></script>
+  <script>
+    NProgress.done()
+  </script>
 </body>
+
 </html>
